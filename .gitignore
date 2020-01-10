@@ -1,0 +1,4 @@
+.vscode/*
+pyxiv-dl-reborn/__pycache__/*
+pyxiv-dl-reborn/*.pyc
+pyxiv-dl-reborn/pydl-images/*
