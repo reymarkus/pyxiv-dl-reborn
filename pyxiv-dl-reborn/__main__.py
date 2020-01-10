@@ -59,7 +59,7 @@ def main():
     ###########
     # runner
     ##########
-    PixivImageRipper(parsedArgs[0], parsedArgs.verbose, parsedArgs.nsfw)
+    PixivImageRipper(parsedArgs.ids[0], parsedArgs.verbose, parsedArgs.nsfw)
 
 # main call
 if __name__ == "__main__":

@@ -26,7 +26,7 @@ class PixivImageRipper():
         # throughout the year
 
         #compile the regex for checking numbers
-        pxIdRegex = regex.compile("^[0-9]{7}$", regex.I)
+        pxIdRegex = regex.compile("^[0-9]{6,7}$", regex.I)
 
         for ids in pixivIds:
             pxIdCheck = pxIdRegex.match(ids)
