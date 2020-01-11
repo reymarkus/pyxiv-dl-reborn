@@ -11,7 +11,7 @@ from imagerip import PixivImageRipper
 """Script version"""
 PYXIVDL_VERSION = "0.1.0"
 
-"""Main function for """
+"""Main function for accepting download args"""
 def main():
     # load argparse here
     argParser = argparse.ArgumentParser(
