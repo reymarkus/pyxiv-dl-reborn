@@ -1,4 +1,4 @@
-import sys, re as regex, requests, json
+import sys, requests, json
 from lxml import etree
 from enum import Enum
 
@@ -52,6 +52,9 @@ class PixivWebCrawler:
         # get art post type
         artPostType = self._detectPostType(pageMetaJson, self.pixivArtId)
 
+        # directly download if it's a single or multi image post
+        if artPostType == PixivArtPostType.IMAGE_SINGLE|PixivArtPostType.IMAGE_MULTI:
+            imageStreamList = self._downloadImagePost(pageMetaJson, self.pixivArtId)
 
     ####################
 
@@ -104,3 +107,48 @@ class PixivWebCrawler:
             return PixivArtPostType.IMAGE_SINGLE
         elif int(metadataRoot["pageCount"]) > 1:
             return PixivArtPostType.IMAGE_MULTI
+
+    # download methods
+    def _downloadImagePost(self, metaJson : json, pxArtId : int):
+        """Downloads the original images from an image post and returns a stream array"""
+        # main post metadata
+        metadataRoot = metaJson["illust"][pxArtId]
+        print("Downloading {}...\n".format(pxArtId))
+
+        # verbose info
+        if self.verboseOutput:
+            print(
+                "==========\n"
+                "Art information:\n\n"
+                "Artist: {} ({})\n".format(metadataRoot["userName"], metadataRoot["userAccount"])
+            )
+            print("Art title: {}\n\n".format(metadataRoot["illustTitle"]))
+
+
+        # get amount of arts in a post
+        imageCount =  int(metadataRoot["pageCOunt"])
+
+        # download images in an index
+        imgStreamList = []
+        for imgIndex in range (1, imageCount):
+            # set current image index
+            currentImgIndex = imgIndex - 1
+
+            # get base image URL
+            baseImageUrl = str(metaJson["urls"]["original"])
+
+            # set image URL to download
+            imageUrl = baseImageUrl.replace("_p" + str(imgIndex), "_p" + str(currentImgIndex))
+
+            # download image stream
+            imageStream = requests.get(
+                imageUrl,
+                headers=self.REQUEST_HEADERS,
+                stream=True
+            )
+
+            # append stream to list
+            imgStreamList.append(imageStream)
+
+        # return image stream list
+        return imgStreamList

@@ -3,8 +3,8 @@
 This is the main script that executes the main pyxiv-dl-reborn argument parser.
 """
 
-import argparse
-from imagerip import PixivImageRipper
+import argparse, re as regex
+from .webcrawler import PixivWebCrawler
 
 # constants
 
@@ -59,7 +59,7 @@ def main():
     ###########
     # runner
     ##########
-    PixivImageRipper(parsedArgs.ids[0], parsedArgs.verbose, parsedArgs.nsfw)
+    PixivWebCrawler(parsedArgs.ids[0], parsedArgs.verbose, parsedArgs.nsfw)
 
 # main call
 if __name__ == "__main__":
