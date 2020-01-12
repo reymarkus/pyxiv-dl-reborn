@@ -1,10 +1,10 @@
-"""pyxiv-dl-reborn main script
+"""pyxiv-dl main script
 
-This is the main script that executes the main pyxiv-dl-reborn argument parser.
+This is the main script that executes the main pyxiv-dl argument parser.
 """
 
-import argparse, re as regex
-from .webcrawler import PixivWebCrawler
+import argparse, re as regex, sys
+from webcrawler import PixivWebCrawler
 
 # constants
 
@@ -16,22 +16,22 @@ def main():
     # load argparse here
     argParser = argparse.ArgumentParser(
         description="pyxiv-dl: Downloads full-sized arts from Pixiv",
-        usage="pyxiv-dl.py [options] urls..."
+        usage="pyxiv-dl.py [options] <ids>>..."
     )
-    
-    # add verbose argument
-    argParser.add_argument(
-        "-v",
-        "--verbose",
-        help="show verbose output",
-        action="store_true"
-    )
-    
+
     # add NSFW confirmation bypass
     argParser.add_argument(
         "-n",
         "--nsfw",
         help="Always allow NSFW image download. If not set, you are asked to confirm the download",
+        action="store_true"
+    )
+
+    # add verbose argument
+    argParser.add_argument(
+        "-v",
+        "--verbose",
+        help="Show verbose output",
         action="store_true"
     )
 
@@ -59,7 +59,27 @@ def main():
     ###########
     # runner
     ##########
-    PixivWebCrawler(parsedArgs.ids[0], parsedArgs.verbose, parsedArgs.nsfw)
+
+    # check first for valid pixiv IDs
+    pxIdRegex = regex.compile("^[0-9]+$", regex.I)
+
+    for ids in parsedArgs.ids[0]:
+        pxIdCheck = pxIdRegex.match(ids)
+        try:
+            if pxIdCheck is not None:
+                pass
+            else:
+                print("ERROR: one or more inputs is not a valid Pixiv Art ID. Aborting.")
+                sys.exit(1)
+        except IndexError:
+            print("ERROR: something went wrong with checking the Pixiv Art IDs. Aborting")
+            sys.exit(1)
+
+        # initialize download
+        PixivWebCrawler.downloadImages(
+            PixivWebCrawler(ids, parsedArgs.verbose, parsedArgs.nsfw)
+        )
+
 
 # main call
 if __name__ == "__main__":

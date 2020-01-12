@@ -1,4 +1,4 @@
-import sys, requests, json
+import sys, requests, json, re as regex, os
 from lxml import etree
 from enum import Enum
 
@@ -23,8 +23,11 @@ class PixivWebCrawler:
         "user-agent": "Mozilla/5.0 (Windows NT 10.0; rv:68.0) Gecko/20100101 Firefox/68.0"
     }
 
-    """Regex for the link that contains original images"""
-    PIXIV_ORIGINAL_IMG_PREFIX_REGEX = "i.pximg.net\/img-original"
+    """Regex for full image filenames"""
+    DOWNLOAD_FILENAME_REGEX = "[0-9]+_p[0-9]+.[a-z]{3}$"
+
+    """The downloads folder"""
+    DOWNLOADS_FOLDER = "pyxiv-dl-images"
 
     def __init__(self, pxArtId : int, isVerbose :  bool, ignoreNsfw : bool):
         """Initialize the class and starts the download"""
@@ -53,8 +56,11 @@ class PixivWebCrawler:
         artPostType = self._detectPostType(pageMetaJson, self.pixivArtId)
 
         # directly download if it's a single or multi image post
-        if artPostType == PixivArtPostType.IMAGE_SINGLE|PixivArtPostType.IMAGE_MULTI:
-            imageStreamList = self._downloadImagePost(pageMetaJson, self.pixivArtId)
+        if artPostType == PixivArtPostType.IMAGE_SINGLE \
+            or artPostType == PixivArtPostType.IMAGE_MULTI:
+            self._downloadImagePost(pageMetaJson, self.pixivArtId)
+        elif artPostType == PixivArtPostType.UGOIRA:
+            print("Cannot download, ugoira support coming soon.")
 
     ####################
 
@@ -66,7 +72,7 @@ class PixivWebCrawler:
 
         # get the page first
         pageRequest = requests.get(
-            self.PIXIV_URL + "/" + pxArtId,
+            self.PIXIV_URL + "/artworks/" + pxArtId,
             headers=self.REQUEST_HEADERS
         )
 
@@ -113,32 +119,24 @@ class PixivWebCrawler:
         """Downloads the original images from an image post and returns a stream array"""
         # main post metadata
         metadataRoot = metaJson["illust"][pxArtId]
-        print("Downloading {}...\n".format(pxArtId))
-
-        # verbose info
-        if self.verboseOutput:
-            print(
-                "==========\n"
-                "Art information:\n\n"
-                "Artist: {} ({})\n".format(metadataRoot["userName"], metadataRoot["userAccount"])
-            )
-            print("Art title: {}\n\n".format(metadataRoot["illustTitle"]))
-
+        print("Downloading {}...".format(pxArtId))
 
         # get amount of arts in a post
-        imageCount =  int(metadataRoot["pageCOunt"])
+        imageCount =  int(metadataRoot["pageCount"])
 
         # download images in an index
         imgStreamList = []
-        for imgIndex in range (1, imageCount):
+        dlFilenames = []
+        for imgIndex in range (0, imageCount):
             # set current image index
-            currentImgIndex = imgIndex - 1
+            currentImgIndex = imgIndex + 1
+            print("Downloading {}/{}...".format(currentImgIndex, imageCount))
 
             # get base image URL
-            baseImageUrl = str(metaJson["urls"]["original"])
+            baseImageUrl = str(metadataRoot["urls"]["original"])
 
             # set image URL to download
-            imageUrl = baseImageUrl.replace("_p" + str(imgIndex), "_p" + str(currentImgIndex))
+            imageUrl = baseImageUrl.replace("_p0", "_p" + str(imgIndex))
 
             # download image stream
             imageStream = requests.get(
@@ -148,7 +146,39 @@ class PixivWebCrawler:
             )
 
             # append stream to list
-            imgStreamList.append(imageStream)
+            imgStreamList.append(imageStream.content)
+            # append download filenames to list
+            dlFilenames.append(regex.search(
+                self.DOWNLOAD_FILENAME_REGEX, imageUrl
+            ).group(0))
 
-        # return image stream list
-        return imgStreamList
+        # download images to folder
+        self._saveImages(dlFilenames, imgStreamList)
+
+    def _saveImages(self, dlFilenames : list, imgStreams : list):
+        """Downloads the full arts and saves it in the folder"""
+
+        # make sub function for getting the fodler name
+        # depending on OS
+        def getFolderPath():
+            """Get the folder path based on the system's OS."""
+            if any(sys.platform == h for h in {"linux", "linux2", "cygwin", "darwin"}):
+                # linux 2.6/linux/cygwin/osx
+                return r"./" + self.DOWNLOADS_FOLDER + "/"
+            elif sys.platform == "win32":
+                # windows
+                return r".\\" +self. DOWNLOADS_FOLDER + "\\"
+
+        # check first if downloads folder exist
+        if not os.path.exists(getFolderPath()):
+            os.makedirs(getFolderPath())
+
+        # write files recursively
+        for i, fileNames in enumerate(dlFilenames):
+            with open(getFolderPath() + fileNames, "wb") as bin:
+                # write file
+                bin.write(imgStreams[i])
+
+                # for verbose output
+                if self.verboseOutput:
+                    print("File written to {}".format(getFolderPath() + fileNames))
