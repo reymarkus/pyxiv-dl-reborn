@@ -1,6 +1,5 @@
 .vscode/*
 pyxiv-dl/__pycache__/*
 pyxiv-dl/*.pyc
-pyxiv-dl/pydl-images/*
-pydl-images
+pyxiv-dl-images
 .idea/*

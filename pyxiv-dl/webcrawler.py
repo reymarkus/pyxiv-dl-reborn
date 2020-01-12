@@ -178,7 +178,4 @@ class PixivWebCrawler:
             with open(getFolderPath() + fileNames, "wb") as bin:
                 # write file
                 bin.write(imgStreams[i])
-
-                # for verbose output
-                if self.verboseOutput:
-                    print("File written to {}".format(getFolderPath() + fileNames))
+                print("File written to {}".format(getFolderPath() + fileNames))
