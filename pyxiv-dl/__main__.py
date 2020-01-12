@@ -16,7 +16,7 @@ def main():
     # load argparse here
     argParser = argparse.ArgumentParser(
         description="pyxiv-dl: Downloads full-sized arts from Pixiv",
-        usage="pyxiv-dl.py [options] <ids>>..."
+        usage="pyxiv-dl.py [options] <ids>..."
     )
 
     # add NSFW confirmation bypass
