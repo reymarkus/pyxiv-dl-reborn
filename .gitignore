@@ -1,0 +1,5 @@
+.vscode/*
+pyxiv-dl/__pycache__/*
+pyxiv-dl/*.pyc
+pyxiv-dl-images
+.idea/*
