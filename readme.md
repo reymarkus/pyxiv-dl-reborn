@@ -49,8 +49,6 @@ pip3 install -r requirements.txt
 These are the features that are not yet implemented and will be added soon.
 
 * Verbose output is not yet fully implemented
-* NSFW download option has bugs yet, to be implemented soon. **For now, download posts at your own risk!**
-    * Consequently, the `-v/--verbose` and `-n/--nsfw` options do not work as intended yet.
 * Ugoira support (animated image post) coming soon!
 
 ### License

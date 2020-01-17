@@ -124,6 +124,23 @@ class PixivWebCrawler:
         # get amount of arts in a post
         imageCount =  int(metadataRoot["pageCount"])
 
+        # check if image is marked as NSFW:
+        if int(metadataRoot["sl"]) >= 4 and self.ignoreNsfw == False:
+            # prompt for NSFW download:
+            while True:
+                nsfwPrompt = input("WARNING: This post may contain sensitive media. Proceed with download? [y/N] ")
+
+                if (str(nsfwPrompt).lower() == "n") or (nsfwPrompt is None):
+                    # if N or no answer is entered, abort
+                    print("Aborting download for this post.")
+                    return None
+                elif str(nsfwPrompt).lower() == "y":
+                    # download
+                    break
+                else:
+                    pass
+
+
         # download images in an index
         imgStreamList = []
         dlFilenames = []
