@@ -23,7 +23,7 @@ def main():
     argParser.add_argument(
         "-n",
         "--nsfw",
-        help="Always allow NSFW image download. If not set, you are asked to confirm the download",
+        help="Always allow NSFW image download. If not set, you are asked to confirm the download per post",
         action="store_true"
     )
 
@@ -76,10 +76,11 @@ def main():
             sys.exit(1)
 
         # initialize download
-        PixivWebCrawler.downloadImages(
-            PixivWebCrawler(ids, parsedArgs.verbose, parsedArgs.nsfw)
-        )
-
+        try:
+            pxCrawl = PixivWebCrawler(ids, parsedArgs.verbose, parsedArgs.nsfw)
+            PixivWebCrawler.downloadImages(pxCrawl)
+        except KeyboardInterrupt:
+            print("\nKeyboard interrupt detected. Aborting.")
 
 # main call
 if __name__ == "__main__":
