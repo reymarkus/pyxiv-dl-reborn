@@ -1,6 +1,7 @@
 import sys, requests, json, re as regex, os
 from lxml import etree
 from enum import Enum
+import ugoira.lib as Ugoira
 
 # enum class for returning pixiv art post types
 class PixivArtPostType(Enum):
@@ -41,6 +42,11 @@ class PixivWebCrawler:
         """Prompt download for NSFW-marked posts"""
         self.ignoreNsfw = ignoreNsfw
 
+        # check first if downloads folder exist
+        if not os.path.exists(self._getFolderPath()):
+            os.makedirs(self._getFolderPath())
+
+
     # main downloader function
     def downloadImages(self):
         """Initialize image downloading"""
@@ -52,15 +58,34 @@ class PixivWebCrawler:
             # exit function
             return
 
+        # check if image is marked as NSFW before downloading anything
+        # NSFW criteria: illust.{PIXIV_ID}.sl >= 4
+        if int(pageMetaJson["illust"][self.pixivArtId]["sl"]) >= 4 \
+                and self.ignoreNsfw == False:
+            # prompt for NSFW download:
+            while True:
+                nsfwPrompt = input("WARNING: This post may contain sensitive media. Proceed with download? [y/N] ")
+
+                if (str(nsfwPrompt).lower() == "n") or (nsfwPrompt == ""):
+                    # if N or no answer is entered, abort
+                    print("Aborting download for this post.")
+                    return None
+                elif str(nsfwPrompt).lower() == "y":
+                    # download
+                    break
+                else:
+                    pass
+
         # get art post type
         artPostType = self._detectPostType(pageMetaJson, self.pixivArtId)
 
         # directly download if it's a single or multi image post
+        print("Downloading {}...".format(self.pixivArtId))
         if artPostType == PixivArtPostType.IMAGE_SINGLE \
             or artPostType == PixivArtPostType.IMAGE_MULTI:
             self._downloadImagePost(pageMetaJson, self.pixivArtId)
         elif artPostType == PixivArtPostType.UGOIRA:
-            print("Cannot download, ugoira support coming soon.")
+            self._downloadUgoiraPost(self.pixivArtId)
 
     ####################
 
@@ -119,27 +144,9 @@ class PixivWebCrawler:
         """Downloads the original images from an image post and returns a stream array"""
         # main post metadata
         metadataRoot = metaJson["illust"][pxArtId]
-        print("Downloading {}...".format(pxArtId))
 
         # get amount of arts in a post
         imageCount =  int(metadataRoot["pageCount"])
-
-        # check if image is marked as NSFW:
-        if int(metadataRoot["sl"]) >= 4 and self.ignoreNsfw == False:
-            # prompt for NSFW download:
-            while True:
-                nsfwPrompt = input("WARNING: This post may contain sensitive media. Proceed with download? [y/N] ")
-
-                if (str(nsfwPrompt).lower() == "n") or (nsfwPrompt is None):
-                    # if N or no answer is entered, abort
-                    print("Aborting download for this post.")
-                    return None
-                elif str(nsfwPrompt).lower() == "y":
-                    # download
-                    break
-                else:
-                    pass
-
 
         # download images in an index
         imgStreamList = []
@@ -170,29 +177,40 @@ class PixivWebCrawler:
             ).group(0))
 
         # download images to folder
-        self._saveImages(dlFilenames, imgStreamList)
+        self._saveImagesFromPost(dlFilenames, imgStreamList)
 
-    def _saveImages(self, dlFilenames : list, imgStreams : list):
+    def _downloadUgoiraPost(self, illustId):
+        """Downloads an ugoira post"""
+        # this incorporates some functions from the ugoira library
+        # found at https://github.com/item4/ugoira
+
+        # get ugoira file
+        print("Downloading ugoira and saving to GIF format")
+        ugoiraData, frames = Ugoira.download_ugoira_zip(int(illustId))
+
+        # convert to GIF and save to path
+        Ugoira.make_gif(
+            self._getFolderPath() + "{}.gif".format(str(illustId)),
+            ugoiraData,
+            frames
+        )
+
+        print("File written to {}.gif".format(self._getFolderPath() + illustId))
+
+    def _saveImagesFromPost(self, dlFilenames : list, imgStreams : list):
         """Downloads the full arts and saves it in the folder"""
-
-        # make sub function for getting the fodler name
-        # depending on OS
-        def getFolderPath():
-            """Get the folder path based on the system's OS."""
-            if any(sys.platform == h for h in {"linux", "linux2", "cygwin", "darwin"}):
-                # linux 2.6/linux/cygwin/osx
-                return r"./" + self.DOWNLOADS_FOLDER + "/"
-            elif sys.platform == "win32":
-                # windows
-                return r".\\" +self. DOWNLOADS_FOLDER + "\\"
-
-        # check first if downloads folder exist
-        if not os.path.exists(getFolderPath()):
-            os.makedirs(getFolderPath())
-
         # write files recursively
         for i, fileNames in enumerate(dlFilenames):
-            with open(getFolderPath() + fileNames, "wb") as bin:
+            with open(self._getFolderPath() + fileNames, "wb") as imgs:
                 # write file
-                bin.write(imgStreams[i])
-                print("File written to {}".format(getFolderPath() + fileNames))
+                imgs.write(imgStreams[i])
+                print("File written to {}".format(self._getFolderPath() + fileNames))
+
+    def _getFolderPath(self):
+        """Get the folder path based on the system's OS."""
+        if any(sys.platform == h for h in {"linux", "linux2", "cygwin", "darwin"}):
+            # linux 2.6/linux/cygwin/osx
+            return r"./{}/".format(self.DOWNLOADS_FOLDER)
+        elif sys.platform == "win32":
+            # windows
+            return r".\\{}\\".format(self.DOWNLOADS_FOLDER)

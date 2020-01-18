@@ -1,5 +1,10 @@
 # pyxiv-dl Changelog
 
+### 0.2.0
+
+* Added ugoira support
+* Added a proper open-source license (yay, ready for initial use!)
+
 ### 0.1.1
 
 * Added proper NSFW post checks. In this way, the `-n`/`--nsfw` flag is now working.
