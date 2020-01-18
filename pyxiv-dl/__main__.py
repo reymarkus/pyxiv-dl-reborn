@@ -9,7 +9,7 @@ from webcrawler import PixivWebCrawler
 # constants
 
 """Script version"""
-PYXIVDL_VERSION = "0.1.1"
+PYXIVDL_VERSION = "0.2.0"
 
 """Main function for accepting download args"""
 def main():

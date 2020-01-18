@@ -1,6 +1,6 @@
-# pyxiv-dl-reborn
+# pyxiv-dl Reborn
 
-A  hobby project of a (hopefully) improved script of my previous `pyxiv-dl` script which rips original size Pixiv arts.
+A  hobby project of a (hopefully) improved script of my previous `pyxiv-dl` personal script which rips original size Pixiv arts.
 
 **Note**: This script is still WIP, and it will be updated in the future!
 
@@ -35,6 +35,7 @@ File written to ./pyxiv-dl-images/66445862_p0.jpg
 * Python >= 3.6
 * `requests`
 * `lxml`
+* `ugoira` >= 0.6.0
 
 ### Download and Install
 
@@ -42,7 +43,7 @@ Clone this repository and install dependencies
 ```
 https://gitlab.com/reymarkus/pyxiv-dl-reborn.git
 cd pyxiv-dl-reborn
-pip3 install -r requirements.txt
+pip install -r requirements.txt
 ```
 
 ### Limitations:
@@ -55,4 +56,4 @@ These are the features that are not yet implemented and will be added soon.
 * [ugoira](https://github.com/item4/ugoira/) by item4, licensed under the [MIT License](https://github.com/item4/ugoira/blob/master/LICENSE)
 
 ### License
-TBD, will decide on the first stable release.
+MIT. See license.txt for more information.
