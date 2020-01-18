@@ -49,7 +49,10 @@ pip3 install -r requirements.txt
 These are the features that are not yet implemented and will be added soon.
 
 * Verbose output is not yet fully implemented
-* Ugoira support (animated image post) coming soon!
+
+### Third-party Libraries used
+
+* [ugoira](https://github.com/item4/ugoira/) by item4, licensed under the [MIT License](https://github.com/item4/ugoira/blob/master/LICENSE)
 
 ### License
 TBD, will decide on the first stable release.
