@@ -46,11 +46,6 @@ cd pyxiv-dl-reborn
 pip install -r requirements.txt
 ```
 
-### Limitations:
-These are the features that are not yet implemented and will be added soon.
-
-* Verbose output is not yet fully implemented
-
 ### Third-party Libraries used
 
 * [ugoira](https://github.com/item4/ugoira/) by item4, licensed under the [MIT License](https://github.com/item4/ugoira/blob/master/LICENSE)
