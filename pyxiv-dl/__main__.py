@@ -100,7 +100,7 @@ def main():
     # run scraper
     for ids in parsedArgs.ids[0]:
         # initialize download
-        pxCrawl = PixivWebCrawler(ids, parsedArgs.verbose, parsedArgs.nsfw)
+        pxCrawl = PixivWebCrawler(ids, parsedArgs.verbose, parsedArgs.nsfw, parsedArgs.range)
         PixivWebCrawler.downloadImages(pxCrawl)
 
 # main call

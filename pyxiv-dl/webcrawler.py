@@ -43,7 +43,7 @@ class PixivWebCrawler:
         self.ignoreNsfw = ignoreNsfw
 
         """The download range"""
-        self.downloadRange = downloadRange
+        self.downloadRange = parseDownloadRange(downloadRange)
 
         # check first if downloads folder exist
         if not os.path.exists(self._getFolderPath()):
@@ -143,23 +143,44 @@ class PixivWebCrawler:
 
     # download methods
     def _downloadImagePost(self, metaJson : json, pxArtId : int):
-        """Downloads the original images from an image post and returns a stream array"""
+        """Downloads the original images from an image post and saves the images"""
         # main post metadata
         metadataRoot = metaJson["illust"][pxArtId]
 
-        # get amount of arts in a post
-        imageCount =  int(metadataRoot["pageCount"])
+        # get amount of arts in a post, set it as the total number
+        # as well
+        imageTotal = int(metadataRoot["pageCount"])
+
+        # starting image index for the downloader.
+        imageIndex = 0
 
         # download images in an index
+        # check if range is set
+        if self.downloadRange is not None:
+            print(self.downloadRange)
+            # if any of the download ranges is set, override
+            # start and end values
+            if self.downloadRange[0] is not None:
+                imageIndex = self.downloadRange[0] -1
+
+            if self.downloadRange[1] is not None:
+                imageTotal = self.downloadRange[1]
+
+        # invoke image download
+        print("{}, {}".format(imageIndex, imageTotal))
+        self._downloadImages(metadataRoot, imageIndex, imageTotal)
+
+    def _downloadImages(self, postMetadata, rangeFrom = 0, rangeTo = 1):
+        """Download images from a specified range"""
         imgStreamList = []
         dlFilenames = []
-        for imgIndex in range (0, imageCount):
+        for imgIndex in range (rangeFrom, rangeTo):
             # set current image index
             currentImgIndex = imgIndex + 1
-            print("Downloading {}/{}...".format(currentImgIndex, imageCount))
+            print("Downloading {}/{}...".format(currentImgIndex, rangeTo))
 
             # get base image URL
-            baseImageUrl = str(metadataRoot["urls"]["original"])
+            baseImageUrl = str(postMetadata["urls"]["original"])
 
             # set image URL to download
             imageUrl = baseImageUrl.replace("_p0", "_p" + str(imgIndex))

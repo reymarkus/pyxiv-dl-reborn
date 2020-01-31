@@ -20,20 +20,21 @@ def validateRange(rangeStr : str) -> bool:
     """Validates the range argument"""
 
     # validate if the format is correct
-    rangeRgx = regex.compile(r"^[0-9]+,[0-9]+$")
-    try:
-        if rangeRgx.match(rangeStr) is None:
-            return False
-    except IndexError:
-        return False
+    # rangeRgx = regex.compile(r"^[0-9]+,[0-9]+$")
+    # try:
+    #     if rangeRgx.match(rangeStr) is None:
+    #         return False
+    # except IndexError:
+    #     return False
 
     # get range indices
     ranges = rangeStr.split(",")
 
     # type cast and compare
     try:
-        rangeFrom = int(ranges[0])
-        rangeTo = int(ranges[1])
+        print("{}, {}".format(ranges[0], ranges[1]))
+        rangeFrom =  0 if ranges[0] == "" else int(ranges[0])
+        rangeTo = 0 if ranges[1] == "" else int(ranges[1])
 
         # compare ranges
         # list of bad conditions:
@@ -47,7 +48,7 @@ def validateRange(rangeStr : str) -> bool:
         if rangeFrom > rangeTo:
             return False
 
-        if (rangeFrom < 0) or (rangeTo < 0):
+        if (rangeFrom <= 0) or (rangeTo <= 0):
             return False
 
     except ValueError:
@@ -99,3 +100,17 @@ def printVerboseMetadata(pageMetadata : list):
     print("Images in post: {}".format(postImageCount))
     print("Pixiv URL: https://www.pixiv.net/artworks/{}".format(illustId))
     print("====================")
+
+def parseDownloadRange(rangeStr : str):
+    """Parse and get the download range indices"""
+
+    # validate first if it is a valid range format
+    if not validateRange(rangeStr):
+        return None
+
+    # get range specifiers
+    ranges = rangeStr.split(",")
+    return  [
+        int(ranges[0]),
+        int(ranges[1])
+    ]
