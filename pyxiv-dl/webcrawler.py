@@ -30,7 +30,7 @@ class PixivWebCrawler:
     """The downloads folder"""
     DOWNLOADS_FOLDER = "pyxiv-dl-images"
 
-    def __init__(self, pxArtId : int, isVerbose = False, ignoreNsfw = False):
+    def __init__(self, pxArtId : int, isVerbose = False, ignoreNsfw = False, downloadRange = None):
         """Initialize the class and starts the download"""
 
         """The post art ID"""
@@ -41,6 +41,9 @@ class PixivWebCrawler:
 
         """Prompt download for NSFW-marked posts"""
         self.ignoreNsfw = ignoreNsfw
+
+        """The download range"""
+        self.downloadRange = downloadRange
 
         # check first if downloads folder exist
         if not os.path.exists(self._getFolderPath()):
@@ -61,10 +64,10 @@ class PixivWebCrawler:
 
         # check if image is marked as NSFW before downloading anything
         # NSFW criteria: illust.{PIXIV_ID}.sl >= 4
+        # also, prompt for NSFW download. if declined, stop
         if int(pageMetadata["sl"]) >= 4 \
-            and self.ignoreNsfw == False:
-            # prompt for NSFW download. if declined, stop
-            if not promptNsfwDownload():
+            and self.ignoreNsfw == False and\
+            not promptNsfwDownload():
                 return
 
         # directly download if it's a single or multi image post

@@ -2,9 +2,11 @@ import re as regex, dateutil
 
 """Helper functions for pyxiv-dl"""
 
+### CLI helpers
+
 def validatePostIdRegex(pxId : list) -> bool:
     """Validates the list of Pixiv post IDs"""
-    postIdRegex = regex.compile("^[0-9]+$", regex.I)
+    postIdRegex = regex.compile(r"^[0-9]+$", regex.I)
     for postId in pxId:
         try:
             if postIdRegex.match(postId) is not None:
@@ -13,6 +15,47 @@ def validatePostIdRegex(pxId : list) -> bool:
             return False
 
     return True
+
+def validateRange(rangeStr : str) -> bool:
+    """Validates the range argument"""
+
+    # validate if the format is correct
+    rangeRgx = regex.compile(r"^[0-9]+,[0-9]+$")
+    try:
+        if rangeRgx.match(rangeStr) is None:
+            return False
+    except IndexError:
+        return False
+
+    # get range indices
+    ranges = rangeStr.split(",")
+
+    # type cast and compare
+    try:
+        rangeFrom = int(ranges[0])
+        rangeTo = int(ranges[1])
+
+        # compare ranges
+        # list of bad conditions:
+        # * x = y
+        # * x > y
+        # * x,y < 0
+
+        if rangeFrom == rangeTo:
+            return False
+
+        if rangeFrom > rangeTo:
+            return False
+
+        if (rangeFrom < 0) or (rangeTo < 0):
+            return False
+
+    except ValueError:
+        return False
+
+    return True
+
+### scraper helpers
 
 def promptNsfwDownload() -> bool:
     """If the NSFW download flag is not set, prompt the user first"""
