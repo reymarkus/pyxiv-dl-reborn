@@ -5,6 +5,7 @@ This is the main script that executes the main pyxiv-dl argument parser.
 
 import argparse, re as regex, sys
 from webcrawler import PixivWebCrawler
+from pyxivhelpers import *
 
 # constants
 
@@ -61,27 +62,18 @@ def main():
     ##########
 
     # check first for valid pixiv IDs
-    pxIdRegex = regex.compile("^[0-9]+$", regex.I)
+    if not validatePostIdRegex(parsedArgs.ids[0]):
+        print("One or more inputs is not a valid Pixiv post ID. Aborting.")
+        sys.exit(1)
 
     for ids in parsedArgs.ids[0]:
-        pxIdCheck = pxIdRegex.match(ids)
-        try:
-            if pxIdCheck is not None:
-                pass
-            else:
-                print("ERROR: one or more inputs is not a valid Pixiv Art ID. Aborting.")
-                sys.exit(1)
-        except IndexError:
-            print("ERROR: something went wrong with checking the Pixiv Art IDs. Aborting")
-            sys.exit(1)
-
         # initialize download
-        try:
-            pxCrawl = PixivWebCrawler(ids, parsedArgs.verbose, parsedArgs.nsfw)
-            PixivWebCrawler.downloadImages(pxCrawl)
-        except KeyboardInterrupt:
-            print("\nKeyboard interrupt detected. Aborting.")
+        pxCrawl = PixivWebCrawler(ids, parsedArgs.verbose, parsedArgs.nsfw)
+        PixivWebCrawler.downloadImages(pxCrawl)
 
 # main call
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\nKeyboard interrupt detected. Aborting.")
