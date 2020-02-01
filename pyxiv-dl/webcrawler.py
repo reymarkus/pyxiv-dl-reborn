@@ -154,20 +154,27 @@ class PixivWebCrawler:
         # starting image index for the downloader.
         imageIndex = 0
 
-        # download images in an index
-        # check if range is set
-        if self.downloadRange is not None:
-            print(self.downloadRange)
+        # download images in a specified range
+        # check if range is set and imageTotal > 1
+        if self.downloadRange is not None and imageTotal > 1:
             # if any of the download ranges is set, override
             # start and end values
             if self.downloadRange[0] is not None:
+                # check first if indexStart > imageTotal
+                # then return error if it is
+                if self.downloadRange[0] > imageTotal:
+                    print("Entered start index exceeds the total images in the post. Aborting.")
+                    return None
+
                 imageIndex = self.downloadRange[0] -1
 
             if self.downloadRange[1] is not None:
-                imageTotal = self.downloadRange[1]
+                # if entered max image index does not go
+                # above the max image count, override
+                if self.downloadRange[1] < imageTotal:
+                    imageTotal = self.downloadRange[1]
 
         # invoke image download
-        print("{}, {}".format(imageIndex, imageTotal))
         self._downloadImages(metadataRoot, imageIndex, imageTotal)
 
     def _downloadImages(self, postMetadata, rangeFrom = 0, rangeTo = 1):

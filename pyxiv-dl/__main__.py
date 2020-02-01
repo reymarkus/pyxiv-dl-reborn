@@ -17,7 +17,7 @@ def main():
     # load argparse here
     argParser = argparse.ArgumentParser(
         description="pyxiv-dl: Downloads full-sized arts from Pixiv",
-        usage="pyxiv-dl.py [options] <ids>...",
+        usage="pyxiv-dl.py [options] <id>...",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=textwrap.dedent("""
         ADDITIONAL NOTES
@@ -76,11 +76,9 @@ def main():
 
     # main argument: pixiv art IDs
     argParser.add_argument(
-        "ids",
+        "id",
         help="your Pixiv medium IDs to get original images",
-        type=str,
-        action="append",
-        nargs="+"
+        action="store",
     )
 
     # set parsed args variable
@@ -89,7 +87,7 @@ def main():
     # validate inputs first
 
     # check first for valid pixiv IDs
-    if not validatePostIdRegex(parsedArgs.ids[0]):
+    if not validatePostIdRegex(parsedArgs.id):
         print("One or more inputs is not a valid Pixiv post ID. Aborting.")
         sys.exit(1)
 
@@ -98,10 +96,8 @@ def main():
         sys.exit(1)
 
     # run scraper
-    for ids in parsedArgs.ids[0]:
-        # initialize download
-        pxCrawl = PixivWebCrawler(ids, parsedArgs.verbose, parsedArgs.nsfw, parsedArgs.range)
-        PixivWebCrawler.downloadImages(pxCrawl)
+    pxCrawl = PixivWebCrawler(parsedArgs.id, parsedArgs.verbose, parsedArgs.nsfw, parsedArgs.range)
+    PixivWebCrawler.downloadImages(pxCrawl)
 
 # main call
 if __name__ == "__main__":

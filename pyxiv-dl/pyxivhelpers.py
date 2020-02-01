@@ -4,54 +4,50 @@ import re as regex, dateutil
 
 ### CLI helpers
 
-def validatePostIdRegex(pxId : list) -> bool:
-    """Validates the list of Pixiv post IDs"""
+def validatePostIdRegex(pxId : str) -> bool:
+    """Validates the given Pixiv post ID"""
     postIdRegex = regex.compile(r"^[0-9]+$", regex.I)
-    for postId in pxId:
-        try:
-            if postIdRegex.match(postId) is not None:
-                pass
-        except IndexError:
-            return False
-
-    return True
+    try:
+        if postIdRegex.match(pxId) is not None:
+            return True
+    except IndexError:
+        return False
 
 def validateRange(rangeStr : str) -> bool:
     """Validates the range argument"""
 
-    # validate if the format is correct
-    # rangeRgx = regex.compile(r"^[0-9]+,[0-9]+$")
-    # try:
-    #     if rangeRgx.match(rangeStr) is None:
-    #         return False
-    # except IndexError:
-    #     return False
-
     # get range indices
-    ranges = rangeStr.split(",")
+    ranges = rangeStr.split(",", 1)
 
     # type cast and compare
     try:
-        print("{}, {}".format(ranges[0], ranges[1]))
-        rangeFrom =  0 if ranges[0] == "" else int(ranges[0])
+        rangeFrom = 0 if ranges[0] == "" else int(ranges[0])
         rangeTo = 0 if ranges[1] == "" else int(ranges[1])
 
-        # compare ranges
-        # list of bad conditions:
-        # * x = y
-        # * x > y
-        # * x,y < 0
-
-        if rangeFrom == rangeTo:
+        # check first if both ranges are not set
+        # using the -r , hack
+        if ranges == ["", ""]:
             return False
 
-        if rangeFrom > rangeTo:
-            return False
+        # check if any of the range param is set
+        # and do testing per side
 
-        if (rangeFrom <= 0) or (rangeTo <= 0):
+        # if either range start/end is set and is <= 0:
+        if (ranges[0] != "" and rangeFrom < 0) or\
+            (ranges[1] != "" and rangeTo < 0):
             return False
+        elif (ranges[0] != "") and (ranges[1] != ""):
+            # if both are set, do conditions here
+            if rangeFrom == rangeTo:
+                return False
 
-    except ValueError:
+            if rangeFrom > rangeTo:
+                return False
+
+            if (rangeFrom <= 0) or (rangeTo <= 0):
+                return False
+
+    except (ValueError, IndexError):
         return False
 
     return True
@@ -110,7 +106,10 @@ def parseDownloadRange(rangeStr : str):
 
     # get range specifiers
     ranges = rangeStr.split(",")
-    return  [
-        int(ranges[0]),
-        int(ranges[1])
-    ]
+
+    try:
+        rangeFrom = None if ranges[0] == "" else int(ranges[0])
+        rangeTo = None if ranges[1] == "" else int(ranges[1])
+        return  [rangeFrom, rangeTo]
+    except ValueError:
+        return None
