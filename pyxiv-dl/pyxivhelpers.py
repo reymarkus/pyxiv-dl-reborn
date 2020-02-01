@@ -40,7 +40,7 @@ def validateRange(rangeStr : str) -> bool:
             # if both are set, do conditions here
             # if from == to or from > to or from,to <=0, fail
             if (rangeFrom == rangeTo) or\
-                (rangeFrom > rangeTo:) or\
+                (rangeFrom > rangeTo) or\
                 ((rangeFrom <= 0) or (rangeTo <= 0)):
                 return False
 
