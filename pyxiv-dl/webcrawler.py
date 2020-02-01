@@ -30,7 +30,7 @@ class PixivWebCrawler:
     """The downloads folder"""
     DOWNLOADS_FOLDER = "pyxiv-dl-images"
 
-    def __init__(self, pxArtId : int, isVerbose = False, ignoreNsfw = False):
+    def __init__(self, pxArtId : int, isVerbose = False, ignoreNsfw = False, downloadRange = None):
         """Initialize the class and starts the download"""
 
         """The post art ID"""
@@ -41,6 +41,9 @@ class PixivWebCrawler:
 
         """Prompt download for NSFW-marked posts"""
         self.ignoreNsfw = ignoreNsfw
+
+        """The download range"""
+        self.downloadRange = parseDownloadRange(downloadRange)
 
         # check first if downloads folder exist
         if not os.path.exists(self._getFolderPath()):
@@ -61,10 +64,10 @@ class PixivWebCrawler:
 
         # check if image is marked as NSFW before downloading anything
         # NSFW criteria: illust.{PIXIV_ID}.sl >= 4
+        # also, prompt for NSFW download. if declined, stop
         if int(pageMetadata["sl"]) >= 4 \
-            and self.ignoreNsfw == False:
-            # prompt for NSFW download. if declined, stop
-            if not promptNsfwDownload():
+            and self.ignoreNsfw == False and\
+            not promptNsfwDownload():
                 return
 
         # directly download if it's a single or multi image post
@@ -140,23 +143,51 @@ class PixivWebCrawler:
 
     # download methods
     def _downloadImagePost(self, metaJson : json, pxArtId : int):
-        """Downloads the original images from an image post and returns a stream array"""
+        """Downloads the original images from an image post and saves the images"""
         # main post metadata
         metadataRoot = metaJson["illust"][pxArtId]
 
-        # get amount of arts in a post
-        imageCount =  int(metadataRoot["pageCount"])
+        # get amount of arts in a post, set it as the total number
+        # as well
+        imageTotal = int(metadataRoot["pageCount"])
 
-        # download images in an index
+        # starting image index for the downloader.
+        imageIndex = 0
+
+        # download images in a specified range
+        # check if range is set and imageTotal > 1
+        if self.downloadRange is not None and imageTotal > 1:
+            # if any of the download ranges is set, override
+            # start and end values
+            if self.downloadRange[0] is not None:
+                # check first if indexStart > imageTotal
+                # then return error if it is
+                if self.downloadRange[0] > imageTotal:
+                    print("Entered start index exceeds the total images in the post. Aborting.")
+                    return None
+
+                imageIndex = self.downloadRange[0] -1
+
+            if self.downloadRange[1] is not None:
+                # if entered max image index does not go
+                # above the max image count, override
+                if self.downloadRange[1] < imageTotal:
+                    imageTotal = self.downloadRange[1]
+
+        # invoke image download
+        self._downloadImages(metadataRoot, imageIndex, imageTotal)
+
+    def _downloadImages(self, postMetadata, rangeFrom = 0, rangeTo = 1):
+        """Download images from a specified range"""
         imgStreamList = []
         dlFilenames = []
-        for imgIndex in range (0, imageCount):
+        for imgIndex in range (rangeFrom, rangeTo):
             # set current image index
             currentImgIndex = imgIndex + 1
-            print("Downloading {}/{}...".format(currentImgIndex, imageCount))
+            print("Downloading {}/{}...".format(currentImgIndex, rangeTo))
 
             # get base image URL
-            baseImageUrl = str(metadataRoot["urls"]["original"])
+            baseImageUrl = str(postMetadata["urls"]["original"])
 
             # set image URL to download
             imageUrl = baseImageUrl.replace("_p0", "_p" + str(imgIndex))
