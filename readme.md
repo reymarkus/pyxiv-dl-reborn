@@ -2,24 +2,29 @@
 
 A  hobby project of a (hopefully) improved script of my previous `pyxiv-dl` personal script which rips original size Pixiv arts.
 
+[![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-black.svg)](https://sonarcloud.io/dashboard?id=reymarkus_pyxiv-dl-reborn)
+
 **Note**: This script is still WIP, and it will be updated in the future!
 
 ### Usage
 ```
 python pyxiv-dl -h
-usage: pyxiv-dl.py [options] <ids>...
+usage: pyxiv-dl.py [options] <id>...
 
 pyxiv-dl: Downloads full-sized arts from Pixiv
 
 positional arguments:
-  ids            your Pixiv medium IDs to get original images
+  id                    your Pixiv medium IDs to get original images
 
 optional arguments:
-  -h, --help     show this help message and exit
-  -n, --nsfw     Always allow NSFW image download. If not set, you are asked
-                 to confirm the download
-  -v, --verbose  Show verbose output
-  -V, --version  Show the application's version and exit
+  -h, --help            show this help message and exit
+  -r RANGE, --range RANGE
+                        Download images from a specified range using a from,to
+                        format. See help for more info
+  -n, --nsfw            Always allow NSFW image download. If not set, you are
+                        asked to confirm the download per post
+  -v, --verbose         Show verbose output
+  -V, --version         Show the application's version and exit
 ```
 
 Example usage:
@@ -36,6 +41,12 @@ File written to ./pyxiv-dl-images/66445862_p0.jpg
 * `requests`
 * `lxml`
 * `ugoira` >= 0.6.0
+* `python-dateutil`
+
+### System dependencies
+* `libxml2-dev`
+* `libxslt1.1`
+* `imagemagick` (for ugoira posts)
 
 ### Download and Install
 
@@ -45,6 +56,14 @@ https://gitlab.com/reymarkus/pyxiv-dl-reborn.git
 cd pyxiv-dl-reborn
 pip install -r requirements.txt
 ```
+
+### Branching Information
+
+This repository uses Git Flow as its branching model. Thus, the specified branches contains different states of the project
+
+* On `master`, tagged commits are considered stable releases, with can sometimes have hotfixes
+* The `develop` branch contains the "bleeding-edge" build which may contain new features, and may be unstable for general use
+* `feature/*` branches contains features or fixes that are in-development, and will likely break when used. 
 
 ### Third-party Libraries used
 
