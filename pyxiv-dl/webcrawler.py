@@ -168,11 +168,11 @@ class PixivWebCrawler:
 
                 imageIndex = self.downloadRange[0] -1
 
-            if self.downloadRange[1] is not None:
+            if (self.downloadRange[1] is not None) and\
+                (self.downloadRange[1] < imageTotal):
                 # if entered max image index does not go
                 # above the max image count, override
-                if self.downloadRange[1] < imageTotal:
-                    imageTotal = self.downloadRange[1]
+                imageTotal = self.downloadRange[1]
 
         # invoke image download
         self._downloadImages(metadataRoot, imageIndex, imageTotal)

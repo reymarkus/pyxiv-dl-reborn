@@ -38,13 +38,10 @@ def validateRange(rangeStr : str) -> bool:
             return False
         elif (ranges[0] != "") and (ranges[1] != ""):
             # if both are set, do conditions here
-            if rangeFrom == rangeTo:
-                return False
-
-            if rangeFrom > rangeTo:
-                return False
-
-            if (rangeFrom <= 0) or (rangeTo <= 0):
+            # if from == to or from > to or from,to <=0, fail
+            if (rangeFrom == rangeTo) or\
+                (rangeFrom > rangeTo:) or\
+                ((rangeFrom <= 0) or (rangeTo <= 0)):
                 return False
 
     except (ValueError, IndexError):
@@ -67,8 +64,7 @@ def promptNsfwDownload() -> bool:
         elif str(nsfwPrompt).lower() == "y":
             # download
             return True
-        else:
-            pass
+
 def printVerboseMetadata(pageMetadata : list):
     """Prints detailed information about the art post from the post metadata"""
 
