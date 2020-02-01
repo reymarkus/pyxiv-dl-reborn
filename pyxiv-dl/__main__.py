@@ -91,7 +91,7 @@ def main():
         print("One or more inputs is not a valid Pixiv post ID. Aborting.")
         sys.exit(1)
 
-    if not validateRange(parsedArgs.range):
+    if parsedArgs.range is not None and not validateRange(parsedArgs.range):
         print("Range parameter is incorrect. See help for more info.")
         sys.exit(1)
 

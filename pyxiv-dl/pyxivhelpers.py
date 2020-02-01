@@ -16,11 +16,11 @@ def validatePostIdRegex(pxId : str) -> bool:
 def validateRange(rangeStr : str) -> bool:
     """Validates the range argument"""
 
-    # get range indices
-    ranges = rangeStr.split(",", 1)
-
     # type cast and compare
     try:
+        # get range indices
+        ranges = rangeStr.split(",", 1)
+
         rangeFrom = 0 if ranges[0] == "" else int(ranges[0])
         rangeTo = 0 if ranges[1] == "" else int(ranges[1])
 
@@ -40,11 +40,11 @@ def validateRange(rangeStr : str) -> bool:
             # if both are set, do conditions here
             # if from == to or from > to or from,to <=0, fail
             if (rangeFrom == rangeTo) or\
-                (rangeFrom > rangeTo:) or\
+                (rangeFrom > rangeTo) or\
                 ((rangeFrom <= 0) or (rangeTo <= 0)):
                 return False
 
-    except (ValueError, IndexError):
+    except (ValueError, IndexError, AttributeError):
         return False
 
     return True
