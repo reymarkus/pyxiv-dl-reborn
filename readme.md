@@ -41,7 +41,7 @@ Downloading 1/1...
 File written to ./pyxiv-dl-images/66445862_p0.jpg
 ```
 
-### Requirements:
+### Requirements
 * Python >= 3.6
 * `requests`
 * `lxml`
@@ -53,7 +53,7 @@ File written to ./pyxiv-dl-images/66445862_p0.jpg
 * `libxslt1.1`
 * `imagemagick` (for ugoira posts)
 
-### Download and Install
+### Download and install
 
 Clone this repository and install dependencies
 ```
@@ -62,7 +62,7 @@ cd pyxiv-dl-reborn
 pip install -r requirements.txt
 ```
 
-### Branching Information
+### Branching information
 
 This repository uses Git Flow as its branching model. Thus, the specified branches contains different states of the project
 
@@ -70,7 +70,7 @@ This repository uses Git Flow as its branching model. Thus, the specified branch
 * The `develop` branch contains the "bleeding-edge" build which may contain new features, and may be unstable for general use
 * `feature/*` branches contains features or fixes that are in-development, and will likely break when used. 
 
-### Third-party Libraries used
+### Third-party libraries used
 
 * [ugoira](https://github.com/item4/ugoira/) by item4, licensed under the [MIT License](https://github.com/item4/ugoira/blob/master/LICENSE)
 
