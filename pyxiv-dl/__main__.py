@@ -3,27 +3,66 @@
 This is the main script that executes the main pyxiv-dl argument parser.
 """
 
-import argparse, re as regex, sys
+import argparse, sys, textwrap
 from webcrawler import PixivWebCrawler
+from pyxivhelpers import *
 
 # constants
 
 """Script version"""
-PYXIVDL_VERSION = "0.2.0"
+PYXIVDL_VERSION = "0.3.0"
 
 """Main function for accepting download args"""
 def main():
     # load argparse here
     argParser = argparse.ArgumentParser(
         description="pyxiv-dl: Downloads full-sized arts from Pixiv",
-        usage="pyxiv-dl.py [options] <ids>..."
+        usage="pyxiv-dl.py [options] <id>",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=textwrap.dedent("""
+        ADDITIONAL NOTES
+        
+        The -r/--range option lets you to download images in a multi-image post on a
+        specified range. This is silently ignored for single and ugoira posts. For the
+        -r/--range option, the format it accepts is the following:
+        
+        \tx,y
+        
+        where 0 > x > y. x denotes the start of the image index to download and y denotes the
+        end of the image index. If y exceeds the total number of posts, it will be silently
+        ignored and will download up to the last image index.
+        
+        These are the valid formats accepted by the -r/--range option:
+        \t1,4\tDownloads images from index 1 to 4
+        \t4,6\tDownloads images from index 4 to 6
+        \t4,\tDownloads images from index 4 up to the last
+        \t,5\tDownloads images from the start up to index 5
+        
+        Anything not in the valid formats are considered invalid.
+        """)
+    )
+
+    argParser.add_argument(
+        "-i",
+        "--index",
+        help="Download a specific image on a multi image post based on its index. Cannot be combined with -r/--range",
+        action="store",
+        type=int
+    )
+
+    argParser.add_argument(
+        "-r",
+        "--range",
+        help="Download images from a specified range using a from,to format. Cannot be combined with -i/--index. "
+             "See help for more info",
+        action="store"
     )
 
     # add NSFW confirmation bypass
     argParser.add_argument(
         "-n",
         "--nsfw",
-        help="Always allow NSFW image download. If not set, you are asked to confirm the download per post",
+        help="Always allow NSFW image download. If not set, you are asked to confirm the download first",
         action="store_true"
     )
 
@@ -46,42 +85,38 @@ def main():
 
     # main argument: pixiv art IDs
     argParser.add_argument(
-        "ids",
-        help="your Pixiv medium IDs to get original images",
-        type=str,
-        action="append",
-        nargs="+"
+        "id",
+        help="your Pixiv medium ID to get original-sized images or ugoira from",
+        action="store"
     )
 
     # set parsed args variable
     parsedArgs = argParser.parse_args()
 
-    ###########
-    # runner
-    ##########
+    # validate inputs first
 
     # check first for valid pixiv IDs
-    pxIdRegex = regex.compile("^[0-9]+$", regex.I)
+    if not validatePostIdRegex(parsedArgs.id):
+        print("One or more inputs is not a valid Pixiv post ID. Aborting.")
+        sys.exit(1)
 
-    for ids in parsedArgs.ids[0]:
-        pxIdCheck = pxIdRegex.match(ids)
-        try:
-            if pxIdCheck is not None:
-                pass
-            else:
-                print("ERROR: one or more inputs is not a valid Pixiv Art ID. Aborting.")
-                sys.exit(1)
-        except IndexError:
-            print("ERROR: something went wrong with checking the Pixiv Art IDs. Aborting")
-            sys.exit(1)
+    if parsedArgs.range is not None and not validateRange(parsedArgs.range):
+        print("Range parameter is incorrect. See help for more info.")
+        sys.exit(1)
 
-        # initialize download
-        try:
-            pxCrawl = PixivWebCrawler(ids, parsedArgs.verbose, parsedArgs.nsfw)
-            PixivWebCrawler.downloadImages(pxCrawl)
-        except KeyboardInterrupt:
-            print("\nKeyboard interrupt detected. Aborting.")
+    # run scraper
+    pxCrawl = PixivWebCrawler(
+        parsedArgs.id,
+        parsedArgs.verbose,
+        parsedArgs.nsfw,
+        parsedArgs.range,
+        parsedArgs.index
+    )
+    PixivWebCrawler.downloadImages(pxCrawl)
 
 # main call
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\nKeyboard interrupt detected. Aborting.")

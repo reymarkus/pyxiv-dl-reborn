@@ -1,6 +1,7 @@
-import sys, requests, json, re as regex, os, ugoira.lib as Ugoira, dateutil.parser
+import sys, requests, json, re as regex, os, dateutil.parser
 from lxml import etree
 from enum import Enum
+from pyxivhelpers import *
 
 # enum class for returning pixiv art post types
 class PixivArtPostType(Enum):
@@ -29,7 +30,7 @@ class PixivWebCrawler:
     """The downloads folder"""
     DOWNLOADS_FOLDER = "pyxiv-dl-images"
 
-    def __init__(self, pxArtId : int, isVerbose :  bool, ignoreNsfw : bool):
+    def __init__(self, pxArtId : int, isVerbose = False, ignoreNsfw = False, downloadRange = None, downloadIndex = None):
         """Initialize the class and starts the download"""
 
         """The post art ID"""
@@ -40,6 +41,12 @@ class PixivWebCrawler:
 
         """Prompt download for NSFW-marked posts"""
         self.ignoreNsfw = ignoreNsfw
+
+        """The download range for multi image posts"""
+        self.downloadRange = parseDownloadRange(downloadRange)
+
+        """The download index for multi image posts"""
+        self.downloadIndex = downloadIndex
 
         # check first if downloads folder exist
         if not os.path.exists(self._getFolderPath()):
@@ -60,55 +67,21 @@ class PixivWebCrawler:
 
         # check if image is marked as NSFW before downloading anything
         # NSFW criteria: illust.{PIXIV_ID}.sl >= 4
+        # also, prompt for NSFW download. if declined, stop
         if int(pageMetadata["sl"]) >= 4 \
-                and self.ignoreNsfw == False:
-            # prompt for NSFW download:
-            while True:
-                nsfwPrompt = input("WARNING: This post may contain sensitive media. Proceed with download? [y/N] ")
-
-                if (str(nsfwPrompt).lower() == "n") or (nsfwPrompt == ""):
-                    # if N or no answer is entered, abort
-                    print("Aborting download for this post.")
-                    return None
-                elif str(nsfwPrompt).lower() == "y":
-                    # download
-                    break
-                else:
-                    pass
-
-        # get art post type
-        artPostType = self._detectPostType(pageMetaJson, self.pixivArtId)
+            and self.ignoreNsfw == False and\
+            not promptNsfwDownload():
+                return
 
         # directly download if it's a single or multi image post
         print("Downloading {}...".format(self.pixivArtId))
         
         # verbose: print post metadata
         if self.verboseOutput:
-            # set variables
-            artistInfo = "{} ({})".format(
-                pageMetadata["userName"],
-                pageMetadata["userAccount"]
-            )
-            artTitle = pageMetadata["illustTitle"]
-            uploadedOn = dateutil.parser.parse(pageMetadata["uploadDate"])\
-                .strftime("%b %-d %Y, %H:%M:%S %Z")
-            postLikes = pageMetadata["likeCount"]
-            postBookmarks = pageMetadata["bookmarkCount"]
-            postViews = pageMetadata["viewCount"]
-            postImageCount = pageMetadata["pageCount"]
+            printVerboseMetadata(pageMetadata)
 
-            # print post metadata
-            print("====================\nPost information:\n")
-            print("Artist: {}".format(artistInfo))
-            print("Title: {}".format(artTitle))
-            print("Upload date: {}".format(uploadedOn))
-            print("Likes: {:,}".format(postLikes))
-            print("Bookmarks: {:,}".format(postBookmarks))
-            print("Views: {:,}".format(postViews))
-            print("Images in post: {}".format(postImageCount))
-            print("Pixiv URL: {}".format(self.PIXIV_URL + "/artworks/" + str(self.pixivArtId)))
-            print("====================")
-        
+        # get art post type
+        artPostType = self._detectPostType(pageMetaJson, self.pixivArtId)
         if artPostType == PixivArtPostType.IMAGE_SINGLE \
             or artPostType == PixivArtPostType.IMAGE_MULTI:
             self._downloadImagePost(pageMetaJson, self.pixivArtId)
@@ -135,6 +108,10 @@ class PixivWebCrawler:
             return None
         elif pageRequest.status_code == 403:
             print("Cannot load art page, access denied. Skipping.")
+            return None
+        elif pageRequest.status_code in range(500, 599):
+            # for HTTP 5xx errors
+            print("Cannot load art page. Server error.")
             return None
 
         # get JSON content from metadata
@@ -169,23 +146,32 @@ class PixivWebCrawler:
 
     # download methods
     def _downloadImagePost(self, metaJson : json, pxArtId : int):
-        """Downloads the original images from an image post and returns a stream array"""
+        """Downloads the original images from an image post and saves the images"""
         # main post metadata
         metadataRoot = metaJson["illust"][pxArtId]
 
-        # get amount of arts in a post
-        imageCount =  int(metadataRoot["pageCount"])
+        # get download ranges
+        downloadRanges = downloadRangesHelper(
+            metadataRoot["pageCount"],
+            self.downloadRange,
+            self.downloadIndex
+        )
 
-        # download images in an index
+        # invoke image download
+        if downloadRanges is not None:
+            self._downloadImages(metadataRoot, downloadRanges[0], downloadRanges[1])
+
+    def _downloadImages(self, postMetadata, rangeFrom = 0, rangeTo = 1):
+        """Download images from a specified range"""
         imgStreamList = []
         dlFilenames = []
-        for imgIndex in range (0, imageCount):
+        for imgIndex in range (rangeFrom, rangeTo):
             # set current image index
             currentImgIndex = imgIndex + 1
-            print("Downloading {}/{}...".format(currentImgIndex, imageCount))
+            print("Downloading {}/{}...".format(currentImgIndex, rangeTo))
 
             # get base image URL
-            baseImageUrl = str(metadataRoot["urls"]["original"])
+            baseImageUrl = str(postMetadata["urls"]["original"])
 
             # set image URL to download
             imageUrl = baseImageUrl.replace("_p0", "_p" + str(imgIndex))
@@ -209,6 +195,8 @@ class PixivWebCrawler:
 
     def _downloadUgoiraPost(self, illustId):
         """Downloads an ugoira post"""
+
+        import ugoira.lib as Ugoira
         # this incorporates some functions from the ugoira library
         # found at https://github.com/item4/ugoira
 

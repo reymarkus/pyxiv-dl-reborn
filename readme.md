@@ -2,24 +2,34 @@
 
 A  hobby project of a (hopefully) improved script of my previous `pyxiv-dl` personal script which rips original size Pixiv arts.
 
+[![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-black.svg)](https://sonarcloud.io/dashboard?id=reymarkus_pyxiv-dl-reborn)
+
 **Note**: This script is still WIP, and it will be updated in the future!
 
 ### Usage
 ```
 python pyxiv-dl -h
-usage: pyxiv-dl.py [options] <ids>...
+usage: pyxiv-dl.py [options] <id>
 
 pyxiv-dl: Downloads full-sized arts from Pixiv
 
 positional arguments:
-  ids            your Pixiv medium IDs to get original images
+  id                    your Pixiv medium ID to get original-sized images or
+                        ugoira from
 
 optional arguments:
-  -h, --help     show this help message and exit
-  -n, --nsfw     Always allow NSFW image download. If not set, you are asked
-                 to confirm the download
-  -v, --verbose  Show verbose output
-  -V, --version  Show the application's version and exit
+  -h, --help            show this help message and exit
+  -i INDEX, --index INDEX
+                        Download a specific image on a multi image post based
+                        on its index. Cannot be combined with -r/--range
+  -r RANGE, --range RANGE
+                        Download images from a specified range using a from,to
+                        format. Cannot be combined with -i/--index. See help for
+                        more info
+  -n, --nsfw            Always allow NSFW image download. If not set, you are
+                        asked to confirm the download first
+  -v, --verbose         Show verbose output
+  -V, --version         Show the application's version and exit
 ```
 
 Example usage:
@@ -31,13 +41,19 @@ Downloading 1/1...
 File written to ./pyxiv-dl-images/66445862_p0.jpg
 ```
 
-### Requirements:
+### Requirements
 * Python >= 3.6
 * `requests`
 * `lxml`
 * `ugoira` >= 0.6.0
+* `python-dateutil`
 
-### Download and Install
+### System dependencies
+* `libxml2-dev`
+* `libxslt1.1`
+* `imagemagick` (for ugoira posts)
+
+### Download and install
 
 Clone this repository and install dependencies
 ```
@@ -46,7 +62,15 @@ cd pyxiv-dl-reborn
 pip install -r requirements.txt
 ```
 
-### Third-party Libraries used
+### Branching information
+
+This repository uses Git Flow as its branching model. Thus, the specified branches contains different states of the project
+
+* On `master`, tagged commits are considered stable releases, with can sometimes have hotfixes
+* The `develop` branch contains the "bleeding-edge" build which may contain new features, and may be unstable for general use
+* `feature/*` branches contains features or fixes that are in-development, and will likely break when used. 
+
+### Third-party libraries used
 
 * [ugoira](https://github.com/item4/ugoira/) by item4, licensed under the [MIT License](https://github.com/item4/ugoira/blob/master/LICENSE)
 
