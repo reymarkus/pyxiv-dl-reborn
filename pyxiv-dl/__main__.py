@@ -53,7 +53,7 @@ def main():
     argParser.add_argument(
         "-r",
         "--range",
-        help="Download images from a specified range using a from,to format. Cannot be combined with -i/--index"
+        help="Download images from a specified range using a from,to format. Cannot be combined with -i/--index. "
              "See help for more info",
         action="store"
     )
@@ -62,7 +62,7 @@ def main():
     argParser.add_argument(
         "-n",
         "--nsfw",
-        help="Always allow NSFW image download. If not set, you are asked to confirm the download per post",
+        help="Always allow NSFW image download. If not set, you are asked to confirm the download first",
         action="store_true"
     )
 
