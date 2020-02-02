@@ -17,13 +17,13 @@ def main():
     # load argparse here
     argParser = argparse.ArgumentParser(
         description="pyxiv-dl: Downloads full-sized arts from Pixiv",
-        usage="pyxiv-dl.py [options] <id>...",
+        usage="pyxiv-dl.py [options] <id>",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=textwrap.dedent("""
         ADDITIONAL NOTES
         
         The -r/--range option lets you to download images in a multi-image post on a
-        specified range. This is silently ignored for single and ugoira posts.For the
+        specified range. This is silently ignored for single and ugoira posts. For the
         -r/--range option, the format it accepts is the following:
         
         \tx,y
@@ -77,7 +77,7 @@ def main():
     # main argument: pixiv art IDs
     argParser.add_argument(
         "id",
-        help="your Pixiv medium IDs to get original images",
+        help="your Pixiv medium ID to get original images or ugoira from",
         action="store",
     )
 
