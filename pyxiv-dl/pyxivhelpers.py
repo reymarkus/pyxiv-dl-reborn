@@ -109,3 +109,66 @@ def parseDownloadRange(rangeStr : str):
         return  [rangeFrom, rangeTo]
     except ValueError:
         return None
+
+def downloadRangesHelper(imageCount : int, downloadRange, downloadIndex):
+    """Helper function for calculating download ranges and/or download index"""
+    # expected output should be [x,y], where x = zero-based image index start,
+    # and y = the amount of images in a post.
+
+    # check if downloadRange and downloadIndex are set
+    # then return an error message
+    if downloadRange is not None and downloadIndex is not None:
+        print("Range and index parameters cannot be combined at the same time.")
+        return None
+
+    # check if there is only one image in a post
+    if imageCount == 1:
+        return [0, 1]
+
+    # checks when download range is set
+    if downloadRange is not None:
+        return _calculateRange(imageCount, downloadRange)
+    elif downloadIndex is not None:
+        return _calculateIndex(imageCount, downloadIndex)
+
+
+def _calculateRange(imageCount : int, downloadRange):
+    """Calculates the download index ranges"""
+
+    rangeMin = 0
+    rangeMax = imageCount
+
+    # do checks per index
+    # 0 = index start
+    # 1 = index end
+    if downloadRange[0] is not None:
+        # check first if indexStart > imageTotal
+        # then return error if it is
+        if downloadRange[0] > imageCount:
+            print("Entered start index exceeds the total images in the post. Aborting.")
+            return None
+
+        rangeMin = downloadRange[0] -1
+
+    if (downloadRange[1] is not None) and\
+        (downloadRange[1] < imageCount):
+        # if entered max image index does not go
+        # above the max image count, override
+        rangeMax = downloadRange[1]
+
+    return [rangeMin, rangeMax]
+
+def _calculateIndex(imageCount : int, downloadIndex : int):
+    """Calculates the download index"""
+
+    # check if downloadIndex <= 0
+    if downloadIndex < 0:
+        print("Entered image index must not be less than 1.")
+        return None
+
+    # check if downloadIndex > imageCount
+    if downloadIndex > imageCount:
+        print("Entered image index must not exceed the post's total image count.")
+        return None
+
+    return [downloadIndex - 1, downloadIndex]
