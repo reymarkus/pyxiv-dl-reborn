@@ -9,20 +9,25 @@ A  hobby project of a (hopefully) improved script of my previous `pyxiv-dl` pers
 ### Usage
 ```
 python pyxiv-dl -h
-usage: pyxiv-dl.py [options] <id>...
+usage: pyxiv-dl.py [options] <id>
 
 pyxiv-dl: Downloads full-sized arts from Pixiv
 
 positional arguments:
-  id                    your Pixiv medium IDs to get original images
+  id                    your Pixiv medium ID to get original-sized images or
+                        ugoira from
 
 optional arguments:
   -h, --help            show this help message and exit
+  -i INDEX, --index INDEX
+                        Download a specific image on a multi image post based
+                        on its index. Cannot be combined with -r/--range
   -r RANGE, --range RANGE
                         Download images from a specified range using a from,to
-                        format. See help for more info
+                        format. Cannot be combined with -i/--index. See help for
+                        more info
   -n, --nsfw            Always allow NSFW image download. If not set, you are
-                        asked to confirm the download per post
+                        asked to confirm the download first
   -v, --verbose         Show verbose output
   -V, --version         Show the application's version and exit
 ```

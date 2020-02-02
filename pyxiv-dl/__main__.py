@@ -43,9 +43,18 @@ def main():
     )
 
     argParser.add_argument(
+        "-i",
+        "--index",
+        help="Download a specific image on a multi image post based on its index. Cannot be combined with -r/--range",
+        action="store",
+        type=int
+    )
+
+    argParser.add_argument(
         "-r",
         "--range",
-        help="Download images from a specified range using a from,to format. See help for more info",
+        help="Download images from a specified range using a from,to format. Cannot be combined with -i/--index. "
+             "See help for more info",
         action="store"
     )
 
@@ -53,7 +62,7 @@ def main():
     argParser.add_argument(
         "-n",
         "--nsfw",
-        help="Always allow NSFW image download. If not set, you are asked to confirm the download per post",
+        help="Always allow NSFW image download. If not set, you are asked to confirm the download first",
         action="store_true"
     )
 
@@ -77,8 +86,8 @@ def main():
     # main argument: pixiv art IDs
     argParser.add_argument(
         "id",
-        help="your Pixiv medium ID to get original images or ugoira from",
-        action="store",
+        help="your Pixiv medium ID to get original-sized images or ugoira from",
+        action="store"
     )
 
     # set parsed args variable
@@ -96,7 +105,13 @@ def main():
         sys.exit(1)
 
     # run scraper
-    pxCrawl = PixivWebCrawler(parsedArgs.id, parsedArgs.verbose, parsedArgs.nsfw, parsedArgs.range)
+    pxCrawl = PixivWebCrawler(
+        parsedArgs.id,
+        parsedArgs.verbose,
+        parsedArgs.nsfw,
+        parsedArgs.range,
+        parsedArgs.index
+    )
     PixivWebCrawler.downloadImages(pxCrawl)
 
 # main call

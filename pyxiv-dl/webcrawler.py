@@ -30,7 +30,7 @@ class PixivWebCrawler:
     """The downloads folder"""
     DOWNLOADS_FOLDER = "pyxiv-dl-images"
 
-    def __init__(self, pxArtId : int, isVerbose = False, ignoreNsfw = False, downloadRange = None):
+    def __init__(self, pxArtId : int, isVerbose = False, ignoreNsfw = False, downloadRange = None, downloadIndex = None):
         """Initialize the class and starts the download"""
 
         """The post art ID"""
@@ -42,8 +42,11 @@ class PixivWebCrawler:
         """Prompt download for NSFW-marked posts"""
         self.ignoreNsfw = ignoreNsfw
 
-        """The download range"""
+        """The download range for multi image posts"""
         self.downloadRange = parseDownloadRange(downloadRange)
+
+        """The download index for multi image posts"""
+        self.downloadIndex = downloadIndex
 
         # check first if downloads folder exist
         if not os.path.exists(self._getFolderPath()):
@@ -147,35 +150,16 @@ class PixivWebCrawler:
         # main post metadata
         metadataRoot = metaJson["illust"][pxArtId]
 
-        # get amount of arts in a post, set it as the total number
-        # as well
-        imageTotal = int(metadataRoot["pageCount"])
-
-        # starting image index for the downloader.
-        imageIndex = 0
-
-        # download images in a specified range
-        # check if range is set and imageTotal > 1
-        if self.downloadRange is not None and imageTotal > 1:
-            # if any of the download ranges is set, override
-            # start and end values
-            if self.downloadRange[0] is not None:
-                # check first if indexStart > imageTotal
-                # then return error if it is
-                if self.downloadRange[0] > imageTotal:
-                    print("Entered start index exceeds the total images in the post. Aborting.")
-                    return None
-
-                imageIndex = self.downloadRange[0] -1
-
-            if (self.downloadRange[1] is not None) and\
-                (self.downloadRange[1] < imageTotal):
-                # if entered max image index does not go
-                # above the max image count, override
-                imageTotal = self.downloadRange[1]
+        # get download ranges
+        downloadRanges = downloadRangesHelper(
+            metadataRoot["pageCount"],
+            self.downloadRange,
+            self.downloadIndex
+        )
 
         # invoke image download
-        self._downloadImages(metadataRoot, imageIndex, imageTotal)
+        if downloadRanges is not None:
+            self._downloadImages(metadataRoot, downloadRanges[0], downloadRanges[1])
 
     def _downloadImages(self, postMetadata, rangeFrom = 0, rangeTo = 1):
         """Download images from a specified range"""
