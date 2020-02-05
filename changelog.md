@@ -1,5 +1,9 @@
 # pyxiv-dl Changelog
 
+
+### 0.3.1
+* Fixed bug on multi-image downloading without passing either `-i` or `-r`
+
 ### 0.3.0
 
 * Added download range option (`-r`/`--range`) for multiple image posts

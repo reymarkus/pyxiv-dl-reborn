@@ -124,6 +124,8 @@ def downloadRangesHelper(imageCount : int, downloadRange, downloadIndex):
     # check if there is only one image in a post
     if imageCount == 1:
         return [0, 1]
+    elif imageCount > 1 and (downloadRange is None and downloadIndex is None):
+        return [0, imageCount]
 
     # checks when download range is set
     if downloadRange is not None:
