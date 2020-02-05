@@ -10,7 +10,7 @@ from pyxivhelpers import *
 # constants
 
 """Script version"""
-PYXIVDL_VERSION = "0.3.0"
+PYXIVDL_VERSION = "0.3.1"
 
 """Main function for accepting download args"""
 def main():
