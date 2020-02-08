@@ -144,6 +144,11 @@ def _calculateRange(imageCount : int, downloadRange):
     # 0 = index start
     # 1 = index end
     if downloadRange[0] is not None:
+        # check if range start < 1
+        if downloadRange[0] < 1:
+            print("Range input values can not be less than 1. Aborting.")
+            return None
+
         # check first if indexStart > imageTotal
         # then return error if it is
         if downloadRange[0] > imageCount:
@@ -152,11 +157,16 @@ def _calculateRange(imageCount : int, downloadRange):
 
         rangeMin = downloadRange[0] -1
 
-    if (downloadRange[1] is not None) and\
-        (downloadRange[1] < imageCount):
+    if downloadRange[1] is not None:
+        # check if range end < 1:
+        if downloadRange[1] < 1:
+            print("Range input values can not be less than 1. Aborting.")
+            return None
+
         # if entered max image index does not go
         # above the max image count, override
-        rangeMax = downloadRange[1]
+        if downloadRange[1] < imageCount:
+            rangeMax = downloadRange[1]
 
     return [rangeMin, rangeMax]
 
