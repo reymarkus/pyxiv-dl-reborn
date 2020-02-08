@@ -1,5 +1,7 @@
 # pyxiv-dl Changelog
 
+### 0.3.2
+* Fixed bug on range input where entering a range value less than 1 will still run the script, but will not get any output.
 
 ### 0.3.1
 * Fixed bug on multi-image downloading without passing either `-i` or `-r`
