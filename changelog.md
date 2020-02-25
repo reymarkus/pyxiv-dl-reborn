@@ -1,5 +1,8 @@
 # pyxiv-dl Changelog
 
+### 0.3.3
+* Fixed bug when attempting to download a non-existent post will throw an exception after the art not found message
+
 ### 0.3.2
 * Fixed bug on range input where entering a range value less than 1 will still run the script, but will not get any output.
 

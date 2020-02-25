@@ -58,12 +58,14 @@ class PixivWebCrawler:
         """Initialize image downloading"""
         # download page metadata
         pageMetaJson = self._getPreloadMetadata(self.pixivArtId)
-        pageMetadata = pageMetaJson["illust"][self.pixivArtId]
 
         # check first if there is JSON output
         if pageMetaJson is None:
             # exit function
             return
+
+        # only get metadata when the output is not None
+        pageMetadata = pageMetaJson["illust"][self.pixivArtId]
 
         # check if image is marked as NSFW before downloading anything
         # NSFW criteria: illust.{PIXIV_ID}.sl >= 4
