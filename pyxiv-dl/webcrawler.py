@@ -214,7 +214,6 @@ class PixivWebCrawler:
 
         print("File written to {}.gif".format(self._getFolderPath() + illustId))
 
-    # def _saveImagesFromPost(self, dlFilenames : list, imgStreams : list):
     def _saveImageFromPost(self, dlFilename : str, imgStream : bytes):
         """Downloads the full-sized image and saves it in the folder"""
         # write files recursively
