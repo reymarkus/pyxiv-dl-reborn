@@ -2,3 +2,4 @@ requests
 lxml
 ugoira>=0.6.0
 python-dateutil
+humanize
