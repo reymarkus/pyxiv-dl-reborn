@@ -1,4 +1,4 @@
-import sys, requests, json, re as regex, os, dateutil.parser
+import sys, requests, json, re as regex, os, dateutil.parser, humanize
 from lxml import etree
 from enum import Enum
 from pyxivhelpers import *
@@ -165,8 +165,7 @@ class PixivWebCrawler:
 
     def _downloadImages(self, postMetadata, rangeFrom = 0, rangeTo = 1):
         """Download images from a specified range"""
-        imgStreamList = []
-        dlFilenames = []
+
         for imgIndex in range (rangeFrom, rangeTo):
             # set current image index
             currentImgIndex = imgIndex + 1
@@ -186,14 +185,14 @@ class PixivWebCrawler:
             )
 
             # append stream to list
-            imgStreamList.append(imageStream.content)
-            # append download filenames to list
-            dlFilenames.append(regex.search(
+            imgData = imageStream.content
+            # get download filename
+            dlFileName = regex.search(
                 self.DOWNLOAD_FILENAME_REGEX, imageUrl
-            ).group(0))
+            ).group(0)
 
-        # download images to folder
-        self._saveImagesFromPost(dlFilenames, imgStreamList)
+            # download image to folder
+            self._saveImageFromPost(dlFileName, imgData)
 
     def _downloadUgoiraPost(self, illustId):
         """Downloads an ugoira post"""
@@ -215,14 +214,20 @@ class PixivWebCrawler:
 
         print("File written to {}.gif".format(self._getFolderPath() + illustId))
 
-    def _saveImagesFromPost(self, dlFilenames : list, imgStreams : list):
-        """Downloads the full arts and saves it in the folder"""
+    # def _saveImagesFromPost(self, dlFilenames : list, imgStreams : list):
+    def _saveImageFromPost(self, dlFilename : str, imgStream : bytes):
+        """Downloads the full-sized image and saves it in the folder"""
         # write files recursively
-        for i, fileNames in enumerate(dlFilenames):
-            with open(self._getFolderPath() + fileNames, "wb") as imgs:
-                # write file
-                imgs.write(imgStreams[i])
-                print("File written to {}".format(self._getFolderPath() + fileNames))
+        # for i, fileNames in enumerate(dlFilenames):
+        with open(self._getFolderPath() + dlFilename, "wb") as img:
+
+            # get file size from bytes
+            fileSize = humanize.naturalsize(sys.getsizeof(imgStream), binary=True)
+
+            # write file
+            img.write(imgStream)
+
+            print("File written to {} ({})".format(self._getFolderPath() + dlFilename, fileSize))
 
     def _getFolderPath(self):
         """Get the folder path based on the system's OS."""
