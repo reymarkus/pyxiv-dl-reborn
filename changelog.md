@@ -1,5 +1,12 @@
 # pyxiv-dl Changelog
 
+### 0.4.0
+* Changed behavior of downloading images from downloading all images then saving them all at once to downloading the images and saving them one by one.
+* Added file size output when an image is downloaded (not available on ugoira downloads due to limitations of `ugoira` library)
+* `webcrawler.py`
+    * Changed `saveImagesFromPost(list, list)` to `saveImageFromPost(str, bytes)`
+        * To change the way the image downloads work, the above function needs to be modified in order to cater one-off downloads instead of aggregating data to lists and saving them to disk one by one.
+
 ### 0.3.3
 * Fixed bug when attempting to download a non-existent post will throw an exception after the art not found message
 
