@@ -51,11 +51,23 @@ def validateRange(rangeStr : str) -> bool:
 
 ### scraper helpers
 
-def promptNsfwDownload() -> bool:
-    """If the NSFW download flag is not set, prompt the user first"""
+def promptNsfwDownload(postSafetyLevel : int) -> bool:
+    """Prompts the user if the download should continue on sensitive/NSFW posts"""
     # prompt for NSFW download:
     while True:
-        nsfwPrompt = input("WARNING: This post may contain sensitive media. Proceed with download? [y/N] ")
+
+        #prompt response
+        nsfwPrompt = ""
+
+        # verify post safetly level
+        # newly-discovered criteria:
+        # SL = 4: potentially sensitive post, not necessarily NSFW
+        # SL = 6: NSFW (R18+) post
+
+        if postSafetyLevel == 4:
+            nsfwPrompt = input("WARNING: This post may contain sensitive media. Proceed with download? [y/N] ")
+        elif postSafetyLevel == 6:
+            nsfwPrompt = input("WARNING: This post contains explicit (e.g. sexual) content. Proceed with download? [y/N] ")
 
         if (str(nsfwPrompt).lower() == "n") or (nsfwPrompt == ""):
             # if N or no answer is entered, abort
@@ -74,12 +86,21 @@ def printVerboseMetadata(pageMetadata : list):
         pageMetadata["userAccount"]
     )
     artTitle = pageMetadata["illustTitle"]
-    uploadedOn = dateutil.parser.parse(pageMetadata["uploadDate"])\
+    uploadedOn = dateutil.parser.parse(pageMetadata["uploadDate"]).astimezone(tz=None)\
         .strftime("%b %-d %Y, %H:%M:%S %Z")
     postLikes = pageMetadata["likeCount"]
     postBookmarks = pageMetadata["bookmarkCount"]
     postViews = pageMetadata["viewCount"]
     postImageCount = pageMetadata["pageCount"]
+
+    # post rating display (safe, potentially sensitive, NSFW)
+    postRating = ""
+    if int(pageMetadata["sl"]) < 4:
+        postRating = "Safe"
+    elif int(pageMetadata["sl"]) == 4:
+        postRating = "Potentially sensitive"
+    elif int(pageMetadata["sl"]) == 6:
+        postRating = "NSFW"
 
     # print post metadata
     print("====================\nPost information:\n")
@@ -91,6 +112,7 @@ def printVerboseMetadata(pageMetadata : list):
     print("Views: {:,}".format(postViews))
     print("Images in post: {}".format(postImageCount))
     print("Pixiv URL: https://www.pixiv.net/artworks/{}".format(illustId))
+    print("Post rating: {}".format(postRating))
     print("====================")
 
 def parseDownloadRange(rangeStr : str):
