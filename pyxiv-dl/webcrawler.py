@@ -70,9 +70,10 @@ class PixivWebCrawler:
         # check if image is marked as NSFW before downloading anything
         # NSFW criteria: illust.{PIXIV_ID}.sl >= 4
         # also, prompt for NSFW download. if declined, stop
-        if int(pageMetadata["sl"]) >= 4 \
+        postSafetyLevel = int(pageMetadata["sl"])
+        if postSafetyLevel >= 4 \
             and self.ignoreNsfw == False and\
-            not promptNsfwDownload():
+            not promptNsfwDownload(postSafetyLevel):
                 return
 
         # directly download if it's a single or multi image post
@@ -212,7 +213,7 @@ class PixivWebCrawler:
             frames
         )
 
-        print("File written to {}.gif".format(self._getFolderPath() + illustId))
+        print("File saved to {}.gif".format(self._getFolderPath() + illustId))
 
     def _saveImageFromPost(self, dlFilename : str, imgStream : bytes):
         """Downloads the full-sized image and saves it in the folder"""
