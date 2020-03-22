@@ -1,5 +1,14 @@
 # pyxiv-dl Changelog
 
+### 0.5.0
+* Differentiated NSFW and potentially sensitive posts
+    * This affects both post information display and the NSFW download prompt
+* Post timestamp now displays the time using your local timezone instead of UTC
+* `pyxivhelpers.py`
+    * Added parameter requirement to `promptNsfwDownload()`
+        * `promptNsfwDownload` now checks the post "safety level" if the post is potentially sensitive or explicit. Appropriate prompts are given depending on the post's "safety level".
+* Reworded the file downloaded message
+
 ### 0.4.0
 * Changed behavior of downloading images from downloading all images then saving them all at once to downloading the images and saving them one by one.
 * Added file size output when an image is downloaded (not available on ugoira downloads due to limitations of `ugoira` library)
