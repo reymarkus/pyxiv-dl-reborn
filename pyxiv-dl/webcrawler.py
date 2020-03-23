@@ -217,8 +217,6 @@ class PixivWebCrawler:
 
     def _saveImageFromPost(self, dlFilename : str, imgStream : bytes):
         """Downloads the full-sized image and saves it in the folder"""
-        # write files recursively
-        # for i, fileNames in enumerate(dlFilenames):
         with open(self._getFolderPath() + dlFilename, "wb") as img:
 
             # get file size from bytes
@@ -227,7 +225,7 @@ class PixivWebCrawler:
             # write file
             img.write(imgStream)
 
-            print("File written to {} ({})".format(self._getFolderPath() + dlFilename, fileSize))
+            print("File saved to {} ({})".format(self._getFolderPath() + dlFilename, fileSize))
 
     def _getFolderPath(self):
         """Get the folder path based on the system's OS."""
