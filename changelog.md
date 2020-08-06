@@ -1,5 +1,8 @@
 # pyxiv-dl Changelog
 
+### 0.5.2
+* Added list of post tags when verbose mode is enabled
+
 ### 0.5.0
 * Differentiated NSFW and potentially sensitive posts
     * This affects both post information display and the NSFW download prompt
