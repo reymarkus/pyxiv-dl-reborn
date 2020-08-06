@@ -92,6 +92,7 @@ def printVerboseMetadata(pageMetadata : list):
     postBookmarks = pageMetadata["bookmarkCount"]
     postViews = pageMetadata["viewCount"]
     postImageCount = pageMetadata["pageCount"]
+    postTags = parsePostTags(pageMetadata["tags"])
 
     # post rating display (safe, potentially sensitive, NSFW)
     postRating = ""
@@ -111,9 +112,27 @@ def printVerboseMetadata(pageMetadata : list):
     print("Bookmarks: {:,}".format(postBookmarks))
     print("Views: {:,}".format(postViews))
     print("Images in post: {}".format(postImageCount))
+    print("Post tags: {}".format(postTags))
     print("Pixiv URL: https://www.pixiv.net/artworks/{}".format(illustId))
     print("Post rating: {}".format(postRating))
     print("====================")
+
+def parsePostTags(tagsMetadataRoot : list):
+    """Parses the list of tags the art has"""
+
+    # parsed tags array storage
+    postTags = ""
+
+    # loop in tags
+    for idx, tags in enumerate(tagsMetadataRoot["tags"]):
+        postTags += tags["tag"]
+
+        # compare index and length
+        # append a comma if loop index < length
+        if idx + 1 < len(tags):
+            postTags += ", "
+
+    return postTags
 
 def parseDownloadRange(rangeStr : str):
     """Parse and get the download range indices"""
